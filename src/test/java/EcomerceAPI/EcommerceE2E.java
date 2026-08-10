@@ -2,6 +2,8 @@ package EcomerceAPI;
 
 import POJO.LogInPayload;
 import POJO.LogInRespPayload;
+import POJO.Order;
+import POJO.placeOrderPayload;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
@@ -14,6 +16,8 @@ import static io.restassured.RestAssured.given;
 public class EcommerceE2E {
 
     static void main(String[] args) {
+
+        //1. LogIn API - grab the token and userId
         RequestSpecification requests = new RequestSpecBuilder().setBaseUri("https://rahulshettyacademy.com/")
                 .setContentType(ContentType.JSON).build();
 
@@ -29,6 +33,7 @@ public class EcommerceE2E {
         System.out.println(resp.getUserId());
         System.out.println(resp.getMessage());
 
+        //2. Add Product API - grab the productId
         RequestSpecification addProductSpecs = new RequestSpecBuilder().setBaseUri("https://rahulshettyacademy.com/")
                 .addHeader("Authorization", resp.getToken())
                 .build();
@@ -46,5 +51,21 @@ public class EcommerceE2E {
         JsonPath addProdJson = new JsonPath(addProductResponse);
         String productId = addProdJson.getString("productId");
         System.out.println(productId);
+
+        //3. Create Order API - grab the orderId
+        RequestSpecification createOrderSpecs = new RequestSpecBuilder().setBaseUri("https://rahulshettyacademy.com/")
+                .addHeader("Authorization", resp.getToken())
+                .setContentType(ContentType.JSON).build();
+
+        Order order = new Order();
+        order.setCountry("India");
+        order.setProductOrderedId(productId);
+
+        placeOrderPayload orderReq = new placeOrderPayload();
+        orderReq.setOrders(java.util.Arrays.asList(order));
+
+        String placeOrderresp = given().spec(createOrderSpecs)
+                .body(orderReq).when().post("api/ecom/order/create-order").then().extract().response().asString();
+        System.out.println(placeOrderresp);
     }
 }
