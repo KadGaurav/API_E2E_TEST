@@ -67,5 +67,15 @@ public class EcommerceE2E {
         String placeOrderresp = given().spec(createOrderSpecs)
                 .body(orderReq).when().post("api/ecom/order/create-order").then().extract().response().asString();
         System.out.println(placeOrderresp);
+
+        //4. Delete Product API
+        RequestSpecification deleteProductSpecs = new RequestSpecBuilder().setBaseUri("https://rahulshettyacademy.com/")
+                .addHeader("Authorization", resp.getToken())
+                .build();
+
+        String deleteProductResp = given().spec(deleteProductSpecs).pathParam("productId", productId)
+                .when().delete("api/ecom/product/delete-product/{productId}")
+                .then().extract().response().asString();
+        System.out.println(deleteProductResp);
     }
 }
